@@ -896,33 +896,51 @@ const AVATAR_COLORS = [
 ];
 
 // ── Persistence ──────────────────────────────────────────────────────
-function saveRoles() {
-  try { localStorage.setItem('ru_empRoles_v1', JSON.stringify(S.empRoles)); } catch {}
-}
-function loadRoles() {
-  try {
-    const raw = localStorage.getItem('ru_empRoles_v1');
-    if (raw) S.empRoles = JSON.parse(raw);
-  } catch {}
-}
-function saveAllocations() {
-  try {
-    localStorage.setItem('ru_allocData_v1', JSON.stringify({
-      rows: S._rawRows,
-      name: S.selectedName,
-    }));
-  } catch(e) {
-    console.warn('Allocation data could not be saved to localStorage (possibly too large).');
+// window.storage = Claude artifact storage (persists in claude.ai preview)
+// localStorage   = fallback for deployed/standalone HTML
+
+async function storeSave(key, value) {
+  if (typeof window.storage !== 'undefined') {
+    try { await window.storage.set(key, value); return; } catch {}
   }
+  try { localStorage.setItem(key, value); } catch {}
 }
-function loadAllocations() {
+
+async function storeLoad(key) {
+  if (typeof window.storage !== 'undefined') {
+    try {
+      const r = await window.storage.get(key);
+      if (r && r.value != null) return r.value;
+    } catch {}
+  }
+  try { return localStorage.getItem(key); } catch {}
+  return null;
+}
+
+function saveRoles() {
+  storeSave('ru_empRoles_v1', JSON.stringify(S.empRoles));
+}
+
+function saveAllocations() {
+  storeSave('ru_allocData_v1', JSON.stringify({
+    rows: S._rawRows,
+    name: S.selectedName,
+  }));
+}
+
+async function loadRoles() {
+  const v = await storeLoad('ru_empRoles_v1');
+  if (v) { try { S.empRoles = JSON.parse(v); } catch {} }
+}
+
+async function loadAllocations() {
+  const v = await storeLoad('ru_allocData_v1');
+  if (!v) return false;
   try {
-    const saved = localStorage.getItem('ru_allocData_v1');
-    if (!saved) return false;
-    const data = JSON.parse(saved);
-    if (data && data.rows && data.rows.length && data.name) {
-      S._rawRows      = data.rows;
-      S.selectedName  = data.name;
+    const d = JSON.parse(v);
+    if (d && Array.isArray(d.rows) && d.rows.length && d.name) {
+      S._rawRows     = d.rows;
+      S.selectedName = d.name;
       return true;
     }
   } catch {}
@@ -1868,34 +1886,31 @@ function benchClearAll() {
   renderBenchDD('brole'); renderBenchDD('bprog'); renderBench();
 }
 
-loadRoles();
-renderChips();
+// ── Boot ──────────────────────────────────────────────────────────────
+async function boot() {
+  await loadRoles();
+  renderChips();
+  if (Object.keys(S.empRoles).length) refreshDropdownOptions();
 
-// ── Restore last session data ─────────────────────────────────────────
-const _hadSavedAlloc = loadAllocations();
-if (_hadSavedAlloc && S._rawRows.length && S.selectedName) {
-  // Re-apply the saved name filter — no re-upload needed
-  S.allocations = S._rawRows.filter(r => r.dirName === S.selectedName);
-
-  // Restore sidebar indicators
-  const el = document.getElementById('file-status');
-  el.style.display = 'flex';
-  document.getElementById('file-status-text').textContent = 'Last saved data';
-  document.getElementById('upload-btn-text').textContent = 'Re-upload';
-
-  // Restore topbar summary
-  document.getElementById('alloc-summary').innerHTML =
-    `<span style="color:var(--accent);font-weight:600">${escHtml(S.selectedName)}</span>
-     &nbsp;·&nbsp; ${S.allocations.length} records
-     &nbsp;<button onclick="showNamePicker()" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0">change</button>`;
-
-  document.getElementById('filter-area').style.display = 'block';
-  refreshDropdownOptions();
-  updateAllPills();
-  renderDashboard();
-} else if (Object.keys(S.empRoles).length) {
-  refreshDropdownOptions();
+  const hadAlloc = await loadAllocations();
+  if (hadAlloc && S._rawRows.length && S.selectedName) {
+    S.allocations = S._rawRows.filter(r => r.dirName === S.selectedName);
+    if (S.allocations.length > 0) {
+      document.getElementById('file-status').style.display = 'flex';
+      document.getElementById('file-status-text').textContent = 'Last saved data';
+      document.getElementById('upload-btn-text').textContent = 'Re-upload';
+      document.getElementById('alloc-summary').innerHTML =
+        `<span style="color:var(--accent);font-weight:600">${escHtml(S.selectedName)}</span>
+         &nbsp;·&nbsp; ${S.allocations.length} records
+         &nbsp;<button onclick="showNamePicker()" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0">change</button>`;
+      document.getElementById('filter-area').style.display = 'block';
+      refreshDropdownOptions();
+      updateAllPills();
+      renderDashboard();
+    }
+  }
 }
+boot();
 </script>
 </body>
 </html>
