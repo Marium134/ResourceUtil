@@ -1268,32 +1268,42 @@ function getDashboardBench() {
     .sort((a,b) => a.name.localeCompare(b.name));
 }
 
-let _benchVisible = true;
+let _benchVisible = false;
+
 function toggleBenchSection() {
-  _benchVisible = !_benchVisible;
-  const sec = document.getElementById('dash-bench-section');
+  const sec  = document.getElementById('dash-bench-section');
   const chev = document.getElementById('sc-bench-chevron');
-  sec.style.display  = _benchVisible ? 'block' : 'none';
-  if (chev) chev.textContent = _benchVisible ? '▲' : '▼';
-}
+  const isOpen = sec.style.display === 'block';
 
-function renderDashboardBench() {
+  if (isOpen) {
+    // close
+    sec.style.display = 'none';
+    _benchVisible = false;
+    if (chev) chev.textContent = '▼';
+    return;
+  }
+
+  // open — build content first
   const bench = getDashboardBench();
-  // Update bench stat card
-  document.getElementById('sc-bench-n').textContent = bench.length;
-  document.getElementById('sc-bench-bar').style.width = bench.length > 0 ? '100%' : '0%';
+  if (!bench.length) {
+    // No bench employees (roles not loaded, or everyone is allocated)
+    const msg = !Object.keys(S.empRoles).length
+      ? 'Upload the Role Based Employees file (Employee Setup tab) to see unallocated resources.'
+      : 'All employees in the roles file have active allocations under the current filters.';
+    document.getElementById('dash-bench-meta').textContent = msg;
+    document.getElementById('dash-bench-tbody').innerHTML =
+      `<tr><td colspan="5" style="padding:32px;text-align:center;color:#94a3b8;font-size:13px">${msg}</td></tr>`;
+    sec.style.display = 'block';
+    _benchVisible = true;
+    if (chev) chev.textContent = '▲';
+    setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    return;
+  }
 
-  const sec   = document.getElementById('dash-bench-section');
-  const tbody = document.getElementById('dash-bench-tbody');
-  const meta  = document.getElementById('dash-bench-meta');
-  if (!bench.length) { sec.style.display = 'none'; return; }
+  document.getElementById('dash-bench-meta').textContent =
+    `${bench.length} employee${bench.length!==1?'s':''} with no active allocations`;
 
-  meta.textContent = `${bench.length} employee${bench.length!==1?'s':''} with no active allocations`;
-  sec.style.display = _benchVisible ? 'block' : 'none';
-  const chev = document.getElementById('sc-bench-chevron');
-  if (chev) chev.textContent = _benchVisible ? '▲' : '▼';
-
-  tbody.innerHTML = bench.map((e, i) => {
+  document.getElementById('dash-bench-tbody').innerHTML = bench.map((e, i) => {
     const [avBg, avTx] = AVATAR_COLORS[i % AVATAR_COLORS.length];
     const ini = e.name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
     return `<tr style="border-bottom:1px solid #e0e7ff">
@@ -1318,6 +1328,28 @@ function renderDashboardBench() {
       </td>
     </tr>`;
   }).join('');
+
+  sec.style.display = 'block';
+  _benchVisible = true;
+  if (chev) chev.textContent = '▲';
+  // Scroll it into view so the user sees it immediately
+  setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
+function renderDashboardBench() {
+  // Only update the count on the stat card.
+  // Table content is built on demand when the card is clicked.
+  const bench = getDashboardBench();
+  document.getElementById('sc-bench-n').textContent   = bench.length;
+  document.getElementById('sc-bench-bar').style.width = bench.length > 0 ? '100%' : '0%';
+
+  // If section is already open, refresh its content live
+  const sec = document.getElementById('dash-bench-section');
+  if (sec && sec.style.display === 'block') {
+    _benchVisible = true;
+    toggleBenchSection();  // close
+    toggleBenchSection();  // re-open with fresh data
+  }
 }
 
 function renderStats(empData) {
