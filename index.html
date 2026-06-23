@@ -664,16 +664,15 @@ td{padding:0;border-bottom:1px solid var(--border2);vertical-align:middle}
               <div class="stat-bar-wrap" style="background:var(--red-bg)"><div class="stat-bar" id="sc-over-bar" style="background:var(--red-dot)"></div></div>
             </div>
             <!-- 4th card: bench / 100% free -->
-            <div class="stat-card" id="sc-bench" onclick="toggleBenchSection()" style="border-color:#c7d2fe;cursor:pointer">
+            <div class="stat-card" id="sc-bench" onclick="toggleStatusFilter('bench')" style="cursor:pointer">
               <div class="stat-card-top">
                 <div class="stat-icon-wrap" style="background:#eef2ff">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/><line x1="12" y1="14" x2="12" y2="21"/></svg>
                 </div>
-                <span id="sc-bench-chevron" style="font-size:12px;color:#6366f1">▼</span>
+                <span class="stat-pct-badge" id="sc-bench-pct" style="background:#eef2ff;color:#6366f1">0%</span>
               </div>
               <div class="stat-number" id="sc-bench-n" style="color:#6366f1">0</div>
               <div class="stat-label" style="color:#6366f1">100% Free</div>
-              <div style="font-size:10px;color:#6366f1;opacity:0.65;margin-top:2px">No active allocations</div>
               <div class="stat-bar-wrap" style="background:#eef2ff;margin-top:8px"><div class="stat-bar" id="sc-bench-bar" style="background:#6366f1"></div></div>
             </div>
           </div>
@@ -692,6 +691,7 @@ td{padding:0;border-bottom:1px solid var(--border2);vertical-align:middle}
                 <div class="legend-item"><div class="legend-dot" style="background:var(--green-dot)"></div>Available</div>
                 <div class="legend-item"><div class="legend-dot" style="background:var(--amber-dot)"></div>At Capacity</div>
                 <div class="legend-item"><div class="legend-dot" style="background:var(--red-dot)"></div>Over Allocated</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>100% Free</div>
               </div>
               <div style="position:relative" id="export-wrap">
                 <button id="export-btn" onclick="toggleExportMenu()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);font-family:inherit;transition:all 0.15s">
@@ -726,39 +726,6 @@ td{padding:0;border-bottom:1px solid var(--border2);vertical-align:middle}
               </thead>
               <tbody id="table-body"></tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- Bench section (100% free resources) -->
-        <div id="dash-bench-section" style="display:none;margin-top:20px">
-          <div style="background:var(--white);border:1px solid #c7d2fe;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
-            <div style="padding:14px 20px;border-bottom:1px solid #e0e7ff;display:flex;align-items:center;justify-content:space-between;background:#f5f3ff">
-              <div>
-                <div style="font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:#4338ca">100% Free Resources</div>
-                <div id="dash-bench-meta" style="font-size:12px;color:#6366f1;margin-top:2px">— employees with no active allocations</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 13px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:50px;font-size:12px;font-weight:600;color:#6366f1">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  100% Available
-                </span>
-                <button onclick="toggleBenchSection()" style="width:28px;height:28px;border-radius:50%;border:1px solid #c7d2fe;background:white;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#6366f1" title="Collapse">✕</button>
-              </div>
-            </div>
-            <div style="overflow-x:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:13px">
-                <thead>
-                  <tr style="background:#f5f3ff">
-                    <th style="padding:10px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e0e7ff;width:40px">#</th>
-                    <th style="padding:10px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e0e7ff">Employee Name</th>
-                    <th style="padding:10px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e0e7ff">Role</th>
-                    <th style="padding:10px 16px;text-align:left;font-size:10.5px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e0e7ff">Program</th>
-                    <th style="padding:10px 16px;text-align:center;font-size:10.5px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e0e7ff">Availability</th>
-                  </tr>
-                </thead>
-                <tbody id="dash-bench-tbody"></tbody>
-              </table>
-            </div>
           </div>
         </div>
 
@@ -1177,24 +1144,50 @@ function getEmpCapacity() {
 
 function getFilteredData() {
   const cap = getEmpCapacity();
-  const rows = S.allocations.filter(r => {
+  const allocatedSet = new Set(
+    S.allocations.filter(r => r.allocStatus === 'Allocated').map(r => r.empName.toLowerCase().trim())
+  );
+
+  // ── Allocated employees ──
+  const allocRows = S.allocations.filter(r => {
     if (r.allocStatus !== 'Allocated') return false;
     const info = getEmpInfo(r.empName);
-    const empOk  = S.fEmpNames.length === 0 || S.fEmpNames.includes(r.empName);
-    const roleOk = S.fRoles.length    === 0 || S.fRoles.includes(info.role || '');
-    const progOk = S.fPrograms.length === 0 || S.fPrograms.includes(info.program || '');
-    return empOk && roleOk && progOk;
+    return (S.fEmpNames.length === 0 || S.fEmpNames.includes(r.empName))
+        && (S.fRoles.length    === 0 || S.fRoles.includes(info.role || ''))
+        && (S.fPrograms.length === 0 || S.fPrograms.includes(info.program || ''));
   });
   const groups = {};
-  rows.forEach(r => { if(!groups[r.empName]) groups[r.empName]=[]; groups[r.empName].push(r); });
-  const empData = Object.entries(groups).map(([empName, empRows]) => {
-    const totalAlloc = Math.round(cap[empName]||0);
+  allocRows.forEach(r => { if (!groups[r.empName]) groups[r.empName] = []; groups[r.empName].push(r); });
+  let allocEmpData = Object.entries(groups).map(([empName, empRows]) => {
+    const totalAlloc = Math.round(cap[empName] || 0);
     const status = getStatus(totalAlloc);
     const info = getEmpInfo(empName);
-    return {empName, rows:empRows, totalAlloc, status, role:info.role||'—', program:info.program||''};
-  }).filter(e => S.fStatus==='all'||e.status===S.fStatus)
-    .sort((a,b) => a.empName.localeCompare(b.empName));
-  return {rows, empData};
+    return { empName, rows: empRows, totalAlloc, status, role: info.role||'—', program: info.program||'', isBench: false };
+  }).sort((a, b) => a.empName.localeCompare(b.empName));
+
+  if (S.fStatus === 'bench') allocEmpData = [];
+  else if (S.fStatus !== 'all') allocEmpData = allocEmpData.filter(e => e.status === S.fStatus);
+
+  // ── Bench employees (in roles file, no active allocations) ──
+  let benchEmpData = [];
+  if (S.fStatus === 'all' || S.fStatus === 'bench') {
+    benchEmpData = Object.entries(S.empRoles)
+      .filter(([name, info]) => {
+        if (allocatedSet.has(name.toLowerCase().trim())) return false;
+        return (S.fEmpNames.length === 0 || S.fEmpNames.includes(name))
+            && (S.fRoles.length    === 0 || S.fRoles.includes(info.role || ''))
+            && (S.fPrograms.length === 0 || S.fPrograms.includes(info.program || ''));
+      })
+      .map(([name, info]) => ({
+        empName: name, rows: [], totalAlloc: 0, status: 'bench',
+        role: info.role||'—', program: info.program||'', isBench: true,
+      }))
+      .sort((a, b) => a.empName.localeCompare(b.empName));
+  }
+
+  const empData = [...allocEmpData, ...benchEmpData];
+  const rows = allocEmpData.flatMap(e => e.rows);
+  return { rows, empData };
 }
 
 // Context-aware cascading dropdown options:
@@ -1248,141 +1241,69 @@ function renderDashboard() {
   const {rows, empData} = getFilteredData();
   renderStats(empData);
   renderTable(empData, rows.length);
-  renderDashboardBench();
   updateSummary(empData.length, rows.length);
 }
 
-function getDashboardBench() {
-  // Employees in empRoles with NO allocated records, filtered by current dashboard Role+Program filters
+
+function renderStats(empData) {
+  // Compute all counts independently of status filter so cards always show correct totals
+  const cap = getEmpCapacity();
   const allocatedSet = new Set(
     S.allocations.filter(r => r.allocStatus === 'Allocated').map(r => r.empName.toLowerCase().trim())
   );
-  return Object.entries(S.empRoles)
-    .filter(([name, info]) => {
-      if (allocatedSet.has(name.toLowerCase().trim())) return false;
-      const roleOk = S.fRoles.length    === 0 || S.fRoles.includes(info.role || '');
-      const progOk = S.fPrograms.length === 0 || S.fPrograms.includes(info.program || '');
-      return roleOk && progOk;
-    })
-    .map(([name, info]) => ({ name, role: info.role||'—', program: info.program||'—' }))
-    .sort((a,b) => a.name.localeCompare(b.name));
-}
+  const allAllocEmps = [...new Set(
+    S.allocations.filter(r => {
+      if (r.allocStatus !== 'Allocated') return false;
+      const info = getEmpInfo(r.empName);
+      return (S.fEmpNames.length === 0 || S.fEmpNames.includes(r.empName))
+          && (S.fRoles.length    === 0 || S.fRoles.includes(info.role || ''))
+          && (S.fPrograms.length === 0 || S.fPrograms.includes(info.program || ''));
+    }).map(r => r.empName)
+  )];
+  const avail = allAllocEmps.filter(n => getStatus(Math.round(cap[n]||0)) === 'available').length;
+  const atCap = allAllocEmps.filter(n => getStatus(Math.round(cap[n]||0)) === 'atCapacity').length;
+  const over  = allAllocEmps.filter(n => getStatus(Math.round(cap[n]||0)) === 'overAllocated').length;
+  const bench = Object.entries(S.empRoles).filter(([name, info]) => {
+    if (allocatedSet.has(name.toLowerCase().trim())) return false;
+    return (S.fEmpNames.length === 0 || S.fEmpNames.includes(name))
+        && (S.fRoles.length    === 0 || S.fRoles.includes(info.role || ''))
+        && (S.fPrograms.length === 0 || S.fPrograms.includes(info.program || ''));
+  }).length;
+  const total = avail + atCap + over + bench || 1;
+  const pA = Math.round(avail/total*100), pC = Math.round(atCap/total*100),
+        pO = Math.round(over/total*100),  pB = Math.round(bench/total*100);
 
-let _benchVisible = false;
-
-function toggleBenchSection() {
-  const sec  = document.getElementById('dash-bench-section');
-  const chev = document.getElementById('sc-bench-chevron');
-  const isOpen = sec.style.display === 'block';
-
-  if (isOpen) {
-    // close
-    sec.style.display = 'none';
-    _benchVisible = false;
-    if (chev) chev.textContent = '▼';
-    return;
-  }
-
-  // open — build content first
-  const bench = getDashboardBench();
-  if (!bench.length) {
-    // No bench employees (roles not loaded, or everyone is allocated)
-    const msg = !Object.keys(S.empRoles).length
-      ? 'Upload the Role Based Employees file (Employee Setup tab) to see unallocated resources.'
-      : 'All employees in the roles file have active allocations under the current filters.';
-    document.getElementById('dash-bench-meta').textContent = msg;
-    document.getElementById('dash-bench-tbody').innerHTML =
-      `<tr><td colspan="5" style="padding:32px;text-align:center;color:#94a3b8;font-size:13px">${msg}</td></tr>`;
-    sec.style.display = 'block';
-    _benchVisible = true;
-    if (chev) chev.textContent = '▲';
-    setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-    return;
-  }
-
-  document.getElementById('dash-bench-meta').textContent =
-    `${bench.length} employee${bench.length!==1?'s':''} with no active allocations`;
-
-  document.getElementById('dash-bench-tbody').innerHTML = bench.map((e, i) => {
-    const [avBg, avTx] = AVATAR_COLORS[i % AVATAR_COLORS.length];
-    const ini = e.name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-    return `<tr style="border-bottom:1px solid #e0e7ff">
-      <td style="padding:10px 16px;color:#a5b4fc">${i+1}</td>
-      <td style="padding:10px 16px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:50%;background:${avBg};color:${avTx};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${escHtml(ini)}</div>
-          <span style="font-size:13px;font-weight:600;color:var(--text1)">${escHtml(e.name)}</span>
-        </div>
-      </td>
-      <td style="padding:10px 16px;color:var(--text2);font-size:13px">${escHtml(e.role)}</td>
-      <td style="padding:10px 16px">
-        ${e.program!=='—'
-          ? `<span style="padding:2px 9px;background:#eef2ff;color:#6366f1;border-radius:20px;font-size:11px;font-weight:600">${escHtml(e.program)}</span>`
-          : '<span style="color:var(--text3)">—</span>'}
-      </td>
-      <td style="padding:10px 16px;text-align:center">
-        <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 12px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:50px;font-size:12px;font-weight:600;color:#6366f1">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          100% Free
-        </span>
-      </td>
-    </tr>`;
-  }).join('');
-
-  sec.style.display = 'block';
-  _benchVisible = true;
-  if (chev) chev.textContent = '▲';
-  // Scroll it into view so the user sees it immediately
-  setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-}
-
-function renderDashboardBench() {
-  // Only update the count on the stat card.
-  // Table content is built on demand when the card is clicked.
-  const bench = getDashboardBench();
-  document.getElementById('sc-bench-n').textContent   = bench.length;
-  document.getElementById('sc-bench-bar').style.width = bench.length > 0 ? '100%' : '0%';
-
-  // If section is already open, refresh its content live
-  const sec = document.getElementById('dash-bench-section');
-  if (sec && sec.style.display === 'block') {
-    _benchVisible = true;
-    toggleBenchSection();  // close
-    toggleBenchSection();  // re-open with fresh data
-  }
-}
-
-function renderStats(empData) {
-  const total = empData.length || 1;
-  const avail = empData.filter(e=>e.status==='available').length;
-  const atCap = empData.filter(e=>e.status==='atCapacity').length;
-  const over  = empData.filter(e=>e.status==='overAllocated').length;
-  const pA = Math.round(avail/total*100), pC = Math.round(atCap/total*100), pO = Math.round(over/total*100);
-
-  document.getElementById('sc-avail-n').textContent = avail;
-  document.getElementById('sc-cap-n').textContent   = atCap;
-  document.getElementById('sc-over-n').textContent  = over;
+  document.getElementById('sc-avail-n').textContent   = avail;
+  document.getElementById('sc-cap-n').textContent     = atCap;
+  document.getElementById('sc-over-n').textContent    = over;
+  document.getElementById('sc-bench-n').textContent   = bench;
   document.getElementById('sc-avail-pct').textContent = pA+'%';
   document.getElementById('sc-cap-pct').textContent   = pC+'%';
   document.getElementById('sc-over-pct').textContent  = pO+'%';
+  document.getElementById('sc-bench-pct').textContent = pB+'%';
   document.getElementById('sc-avail-bar').style.width = pA+'%';
   document.getElementById('sc-cap-bar').style.width   = pC+'%';
   document.getElementById('sc-over-bar').style.width  = pO+'%';
+  document.getElementById('sc-bench-bar').style.width = pB+'%';
 
-  // Active state
-  ['available','atCapacity','overAllocated'].forEach(k => {
-    const card = document.getElementById('sc-'+{available:'available',atCapacity:'atcap',overAllocated:'over'}[k]);
-    card.classList.toggle('active', S.fStatus===k);
-  });
+  // Active card states
+  document.getElementById('sc-available').classList.toggle('active', S.fStatus === 'available');
+  document.getElementById('sc-atcap').classList.toggle('active',     S.fStatus === 'atCapacity');
+  document.getElementById('sc-over').classList.toggle('active',      S.fStatus === 'overAllocated');
+  const benchCard = document.getElementById('sc-bench');
+  const benchActive = S.fStatus === 'bench';
+  benchCard.style.background   = benchActive ? '#eef2ff' : '';
+  benchCard.style.borderColor  = benchActive ? '#c7d2fe' : '';
+  benchCard.style.borderWidth  = benchActive ? '2px'     : '';
 
   // Distribution bar
   const dist = document.getElementById('dist-bar');
   dist.innerHTML = '';
-  [[avail,CAP_DOT.available,'Available'],[atCap,CAP_DOT.atCapacity,'At Capacity'],[over,CAP_DOT.overAllocated,'Over Allocated']]
-    .filter(([c])=>c>0).forEach(([c,col,lbl]) => {
+  [[avail,'#22c55e','Available'],[atCap,'#f59e0b','At Capacity'],[over,'#ef4444','Over Allocated'],[bench,'#6366f1','100% Free']]
+    .filter(([c]) => c > 0).forEach(([c, col, lbl]) => {
       const seg = document.createElement('div');
       seg.className = 'dist-segment';
-      seg.style.cssText = `width:${(c/(avail+atCap+over))*100}%;background:${col}`;
+      seg.style.cssText = `width:${(c/(avail+atCap+over+bench))*100}%;background:${col}`;
       seg.title = `${lbl}: ${c}`;
       dist.appendChild(seg);
     });
@@ -1395,24 +1316,41 @@ function renderTable(empData, totalRecords) {
     tbody.innerHTML = '<tr class="no-data-row"><td colspan="5">No results match the current filters.</td></tr>';
     return;
   }
-  tbody.innerHTML = empData.map(({empName,rows,totalAlloc,status,role,program},empIdx) => {
-    const dotColor = CAP_DOT[status], color = CAP_COLOR[status], bgColor = CAP_BG[status];
-    const [avBg,avTx] = AVATAR_COLORS[empIdx % AVATAR_COLORS.length];
+  tbody.innerHTML = empData.map(({empName, rows, totalAlloc, status, role, program, isBench}, empIdx) => {
+    const [avBg, avTx] = AVATAR_COLORS[empIdx % AVATAR_COLORS.length];
     const ini = escHtml(initials(empName));
+    const empTdInner = `<div class="emp-inner">
+      <div class="emp-avatar" style="background:${avBg};color:${avTx}">${ini}</div>
+      <div>
+        <div class="emp-name">${escHtml(empName)}</div>
+        <div class="emp-role">${escHtml(role)}</div>
+        ${program?`<span class="prog-badge">${escHtml(program)}</span>`:''}
+      </div>
+    </div>`;
+
+    // ── Bench employee: single row, no projects ──
+    if (isBench) {
+      return `<tr>
+        <td class="emp-td" style="border-bottom:2px solid var(--border)">${empTdInner}</td>
+        <td colspan="3" style="padding:14px 18px;border-bottom:2px solid var(--border);color:var(--text3);font-style:italic;font-size:13px">
+          No active project allocations
+        </td>
+        <td class="cap-td" style="background:#eef2ff;border-left:3px solid #6366f1;border-bottom:2px solid var(--border);text-align:center;vertical-align:middle;padding:16px 18px;min-width:130px">
+          <div class="cap-inner">
+            <div class="cap-label" style="color:#4338ca">100% Free</div>
+            <div class="cap-pct" style="color:#4338ca">0%</div>
+            <div class="cap-bar-wrap" style="background:#c7d2fe22"><div class="cap-bar" style="width:0%;background:#6366f1"></div></div>
+            <div class="cap-projects" style="color:#6366f1;opacity:0.7">No projects</div>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    // ── Allocated employee: multiple rows with rowspan ──
+    const dotColor = CAP_DOT[status], color = CAP_COLOR[status], bgColor = CAP_BG[status];
     const rowCount = rows.length;
     const lastBorder = 'border-bottom:2px solid var(--border)';
-
-    const empTd = `<td class="emp-td" rowspan="${rowCount}">
-      <div class="emp-inner">
-        <div class="emp-avatar" style="background:${avBg};color:${avTx}">${ini}</div>
-        <div>
-          <div class="emp-name">${escHtml(empName)}</div>
-          <div class="emp-role">${escHtml(role)}</div>
-          ${program?`<span class="prog-badge">${escHtml(program)}</span>`:''}
-        </div>
-      </div>
-    </td>`;
-
+    const empTd = `<td class="emp-td" rowspan="${rowCount}">${empTdInner}</td>`;
     const capTd = `<td class="cap-td" rowspan="${rowCount}" style="background:${bgColor};border-left-color:${dotColor};${lastBorder}">
       <div class="cap-inner">
         <div class="cap-label" style="color:${color}">${CAP[status].label}</div>
@@ -1424,8 +1362,8 @@ function renderTable(empData, totalRecords) {
       </div>
     </td>`;
 
-    return rows.map((row,rIdx) => {
-      const isLast = rIdx===rowCount-1;
+    return rows.map((row, rIdx) => {
+      const isLast = rIdx === rowCount-1;
       const cellBorder = isLast ? lastBorder : '';
       const allocColor = CAP_DOT[getStatus(row.alloc)];
       return `<tr>
